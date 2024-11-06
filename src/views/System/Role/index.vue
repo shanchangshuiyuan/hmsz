@@ -32,7 +32,7 @@
             </span>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item @click.native="goEdit(item.roleId)">编辑角色</el-dropdown-item>
-              <el-dropdown-item>删除</el-dropdown-item>
+              <el-dropdown-item @click.native="deleteRole(item.roleId)">删除</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </div>
@@ -85,7 +85,7 @@
 </template>
 
 <script>
-import { getRoleListAPI, getTreeListAPI, getRoleDetailAPI, getRoleUserAPI } from '@/api/system'
+import { getRoleListAPI, getTreeListAPI, getRoleDetailAPI, getRoleUserAPI, delRoleUserAPI } from '@/api/system'
 
 // 递归添加disabled属性
 // 重复的执行同一个函数 目的是为针对于每一层中的每一个对象都执行相同的逻辑
@@ -166,6 +166,16 @@ export default {
       // 思路: 针对于treeList中的每一项（每一层中的每一项）都动态添加一个disabled为true
       this.treeList = res.data
       // addDisabled(this.treeList)
+    },
+
+    deleteRole(id) {
+      this.$confirm('此操作将永久删除该角色, 是否继续?', '提示',).then(async () => {
+        await delRoleUserAPI(id)
+        this.$message.success('删除成功');
+        this.getRoleList()
+      }).catch(() => {
+        this.$message.info('已取消删除');
+      })
     }
   }
 }

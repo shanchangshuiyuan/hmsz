@@ -14,6 +14,8 @@ import router from './router'
 //import 可以执行该文件
 import './permisson'
 
+import '@/directive/index'
+
 // 注册svg
 import '@/icons'
 

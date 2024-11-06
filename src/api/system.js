@@ -101,3 +101,10 @@ export function updateRoleAPI(data) {
     data
   })
 }
+
+export function delRoleUserAPI(roleId) {
+  return request({
+    url: `/park/sys/role/${roleId}`,
+    method: 'DELETE'
+  })
+}

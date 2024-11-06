@@ -19,7 +19,10 @@
       <el-button type="primary" @click="doSearch">查询</el-button>
     </div>
     <div class="create-container">
-      <el-button type="primary" @click="$router.push('/addEnterprise')"
+      <el-button
+        type="primary"
+        v-permission="'park:enterprise:add_edit'"
+        @click="$router.push('/addEnterprise')"
         >添加企业</el-button
       >
     </div>
@@ -34,7 +37,7 @@
                 width="320"
                 prop="buildingName"
               />
-              <el-table-column label="租赁起始时间" prop="startTime" >
+              <el-table-column label="租赁起始时间" prop="startTime">
                 <template #default="scope">
                   {{ scope.row.startTime }} - {{ scope.row.endTime }}
                 </template>
@@ -61,12 +64,14 @@
                     :disabled="scope.row.status === 3"
                     type="text"
                     @click="outRent(scope.row.id)"
+                    v-permission="'park:rent:add_surrender'"
                     >退租</el-button
                   >
                   <el-button
                     size="mini"
                     :disabled="scope.row.status !== 3"
                     type="text"
+                    v-permission="'park:rent:remove'"
                     @click="deleteRent(scope.row.id)"
                     >删除</el-button
                   >
@@ -82,15 +87,22 @@
         <el-table-column label="操作">
           <template #default="{ row }">
             <el-button size="mini" type="text" @click="addRent(row.id)"
+            v-permission="'park:rent:add_surrender'"
               >添加合同</el-button
             >
             <el-button size="mini" type="text" @click="lookRent(row.id)"
+            v-permission="'park:enterprise:query'"
               >查看</el-button
             >
             <el-button size="mini" type="text" @click="editEnterprise(row.id)"
+            v-permission="'park:enterprise:add_edit'"
               >编辑</el-button
             >
-            <el-button size="mini" type="text" @click="deleteEnterprise(row.id)"
+            <el-button
+              size="mini"
+              type="text"
+              @click="deleteEnterprise(row.id)"
+              v-permission="'park:enterprise:remove'"
               >删除</el-button
             >
           </template>
@@ -191,8 +203,9 @@ import {
   outRentAPI,
   deleteEnterpriseAPI,
 } from "@/api/park";
-import { getBuildingRentListAPI,deleteRentAPI } from "@/api/building";
+import { getBuildingRentListAPI, deleteRentAPI } from "@/api/building";
 import { uploadAPI } from "@/api/common";
+import { mapState } from "vuex";
 export default {
   data() {
     return {
@@ -226,6 +239,10 @@ export default {
   },
   mounted() {
     this.getList();
+  },
+
+  computed: {
+    ...mapState("menu", ["permission"]),
   },
   methods: {
     deleteEnterprise(id) {
@@ -353,17 +370,17 @@ export default {
     beforeUpload(file) {
       // console.log(file);
       const fileType = [
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "application/msword",
-      "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/msword",
+        "application/pdf",
       ];
       const result = fileType.includes(file.type);
-      const isLimit5 = file.size / 1024 / 1024 < 5
-      if(result && isLimit5) {
-          return true
+      const isLimit5 = file.size / 1024 / 1024 < 5;
+      if (result && isLimit5) {
+        return true;
       } else {
-          this.$message.error("上传文件错误,请按格式上传")
-          return false
+        this.$message.error("上传文件错误,请按格式上传");
+        return false;
       }
     },
     onExceed() {
@@ -373,7 +390,6 @@ export default {
       this.rentForm.contractId = "";
       this.rentForm.contractUrl = "";
       this.$refs.addForm.validateField("contractId");
-
     },
     // 获取楼宇下拉列表
     async getBuildList() {
@@ -390,7 +406,7 @@ export default {
       this.rentForm.enterpriseId = id;
     },
     // 删除合同
-    deleteRent(id){
+    deleteRent(id) {
       this.$confirm("此操作将永久删除该企业, 是否继续?", "提示")
         .then(async () => {
           await deleteRentAPI(id);
